@@ -1,93 +1,104 @@
 package com.telerikacademy.springjbdcdemo.repositories;
 
-import java.sql.*;
-
 import com.telerikacademy.springjbdcdemo.models.Employee;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-@PropertySource("classpath:application.properties")
 public class SqlEmployeeRepository implements EmployeeRepository {
-    private String dbUrl, username, password;
-    List<Employee>employees=new ArrayList<>();
-
-    public SqlEmployeeRepository(Environment env) {
-        dbUrl=env.getProperty("database.url");
-        username=env.getProperty("database.username");
-        password=env.getProperty("database.password");
-    }
+    @Autowired
+    private SessionFactory sessionFactory;
 
     @Override
     public void create(Employee employee) {
-
+        try (
+                Session session = sessionFactory.openSession();
+        ) {
+            session.beginTransaction();
+            session.save(employee);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public List<Employee> getAll() {
-        String query="select employeeId,firstName,lastName,title from  employees ";
+        List<Employee> result = new ArrayList<>();
         try (
-            Connection connection = DriverManager.getConnection(dbUrl, username, password);
-            Statement statement=connection.createStatement();
-            ResultSet resultSet=statement.executeQuery(query);
-        ){
-            employees=readData(resultSet);
-        }catch (SQLException e){
-            System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+                Session session = sessionFactory.openSession();
+        ) {
+            session.beginTransaction();
+            Query query = session.createQuery("from Employee");
+            result = query.list();
+            session.getTransaction().commit();
         }
-        return employees;
+        return result;
     }
 
     @Override
     public Employee getById(int id) {
-        return null;
+        Employee result = null;
+        try (
+                Session session = sessionFactory.openSession();
+        ) {
+            session.beginTransaction();
+            result = session.get(Employee.class, id);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
+        }
+        return result;
     }
 
     @Override
     public List<Employee> getByJobTitle(String jobTitle) {
-
-        String query="select employeeId,firstName,lastName,title " +
-                "from  employees " +
-                "where title=?";
-        try {
-            Connection connection = DriverManager.getConnection(dbUrl, username, password);
-            PreparedStatement statement=connection.prepareStatement(query);
-            statement.setString(1,jobTitle);
-            ResultSet resultSet=statement.executeQuery();
-            employees=readData(resultSet);
-        }catch (SQLException e){
+        List<Employee> result = new ArrayList<>();
+        try (
+                Session session = sessionFactory.openSession();
+        ) {
+            session.beginTransaction();
+            Query query = session.createQuery("from Employee where jobTitle=:jobTitle");
+            query.setParameter("jobTitle", jobTitle);
+            result = query.list();
+            session.getTransaction().commit();
+        } catch (Exception e) {
             System.out.println(e.getMessage());
             throw new RuntimeException(e);
         }
-        return employees;
+        return result;
     }
 
     @Override
     public void update(int id, Employee employee) {
-
+        {
+            try (
+                    Session session = sessionFactory.openSession();
+            ) {
+                session.beginTransaction();
+                Employee employeeToChange = session.get(Employee.class, id);
+                employeeToChange.setFirstName(employee.getFirstName());
+                employeeToChange.setLastName(employeeToChange.getLastName());
+                employeeToChange.setJobTitle(employeeToChange.getJobTitle());
+                session.getTransaction().commit();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     @Override
     public void delete(int id) {
 
-    }
-    private List<Employee> readData(ResultSet employeesData)throws  SQLException{
-        List<Employee> employees=new ArrayList<>();
-        while(employeesData.next()){
-            Employee e=new Employee(
-                    employeesData.getInt("EmployeeID"),
-                    employeesData.getString("FirstName"),
-                    employeesData.getString("LastName"),
-                    employeesData.getString("Title")
-
-            );
-            employees.add(e);
-
-        }
-        return  employees;
     }
 }

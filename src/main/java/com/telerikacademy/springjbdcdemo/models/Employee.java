@@ -1,7 +1,32 @@
 package com.telerikacademy.springjbdcdemo.models;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "employees")
 public class Employee {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "EmployeeID")
     private int id;
+    @Column(name = "FirstName")
+    private String firstName;
+    @Column(name = "LastName")
+    private String lastName;
+    @Column(name = "JobTitle")
+    private String jobTitle;
+    @OneToOne
+    @JoinColumn(name = "AddressId")
+    private Address address;
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
 
     public void setId(int id) {
         this.id = id;
@@ -26,8 +51,6 @@ public class Employee {
         this.jobTitle = jobTitle;
     }
 
-    private String firstName;
-    private String lastName;
 
     public int getId() {
         return id;
@@ -45,8 +68,8 @@ public class Employee {
         return jobTitle;
     }
 
-    private String jobTitle;
-    public Employee(){
+
+    public Employee() {
 
     }
 }
