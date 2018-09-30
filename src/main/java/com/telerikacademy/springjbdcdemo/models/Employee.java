@@ -1,6 +1,7 @@
 package com.telerikacademy.springjbdcdemo.models;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "employees")
@@ -18,6 +19,21 @@ public class Employee {
     @OneToOne
     @JoinColumn(name = "AddressId")
     private Address address;
+
+    public List<Project> getProjects() {
+        return projects;
+    }
+
+    public void setProjects(List<Project> projects) {
+        this.projects = projects;
+    }
+
+    @ManyToMany
+    @JoinTable(name="employeesprojects",
+    joinColumns=@JoinColumn(name="EmployeeID"),
+    inverseJoinColumns = @JoinColumn(name="ProjectID")
+    )
+    private List<Project> projects;
 
     public Address getAddress() {
         return address;
