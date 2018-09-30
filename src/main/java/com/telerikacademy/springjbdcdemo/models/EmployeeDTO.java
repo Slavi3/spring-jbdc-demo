@@ -19,21 +19,21 @@ public class EmployeeDTO {
         this.lastName = lastName;
     }
 
-    public Address getAddress() {
+    public AddressDTO getAddress() {
         return address;
     }
 
-    public void setAddress(Address address) {
+    public void setAddress(AddressDTO address) {
         this.address = address;
     }
 
     private String lastName;
 
-    public EmployeeDTO(String firstName, String lastName, Address address) {
+    public EmployeeDTO(String firstName, String lastName, AddressDTO address) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.address = address;
     }
 
-    private Address address;
+    private AddressDTO address;
 }

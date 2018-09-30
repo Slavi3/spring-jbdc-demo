@@ -1,6 +1,8 @@
 package com.telerikacademy.springjbdcdemo.controllers;
 
+import com.telerikacademy.springjbdcdemo.models.AddressDTO;
 import com.telerikacademy.springjbdcdemo.models.Employee;
+import com.telerikacademy.springjbdcdemo.models.EmployeeDTO;
 import com.telerikacademy.springjbdcdemo.services.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,8 +30,12 @@ public class EmployeesRestController {
     }
 
     @GetMapping("/{id}")
-    public Employee getEmployeeById(@PathVariable int id) {
-        return employeeService.getById(id);
+    public EmployeeDTO getEmployeeById(@PathVariable int id) {
+        Employee employee=employeeService.getById(id);
+        return new EmployeeDTO(
+                employee.getFirstName(),
+                employee.getLastName(),
+                new AddressDTO(employee.getAddress().getAddressText()));
     }
 
     @GetMapping("/title/{jobTitle}")
